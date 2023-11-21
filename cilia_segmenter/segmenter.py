@@ -3,19 +3,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyclesperanto_prototype as cle
 from skimage import morphology
+from skimage.measure import label
 
 def cilia_binarization (img):
     """
     This function binarises the cilia channel from an image array by predicting foreground and background and returns an array.
     Note: the only possible input is the cilia channel where the dimensions are the z stack and the size of the image. [:,:,:].
     Parameters:
-    img: ndarray
+    img: bool ndarray
         Variable containing the loaded image (cilia channel).
     """
     segmenter = apoc.PixelClassifier(opencl_filename='D:/estela/src/PixelClassifier.cl')
     binarized_img = segmenter.predict(image=img)
-    binarized_array = np.array(binarized_img)
-    plt.imshow(binarized_array[30,:,:], cmap='gray')
+    binarized_array = np.array(binarized_img) >1
     
     return binarized_array
 
@@ -31,7 +31,20 @@ def eroder (img, radius):
     plt.imshow(eroded_array[30,:,:], cmap='gray')
     
     return eroded_array
+ 
+def closing_labels (img, radius):
+    """
+    This function closes the gaps between the different objects of a binarised image and returns an array.
+    Parameters:
+    img: ndarray
+        Variable containing the binarized image.
+    """
+    closing_labels_img = cle.closing_labels (img, radius = radius)
+    closing_labels_array = np.array(closing_labels_img) > 1
     
+    return closing_labels_array
+
+   
 def remove_small_objects (img, min_size=64):
     """
     This function removes objects from a binarized image.
@@ -41,7 +54,7 @@ def remove_small_objects (img, min_size=64):
     min_size: int, optional
         The smallest allowable object size.
     """
-    cleaned_img = morphology.remove_small_objects(img, min_size)
-    plt.imshow(cleaned_img[30,:,:], cmap='gray')
-    
+    labelled_img = label(img)
+    cleaned_img = morphology.remove_small_objects(labelled_img, min_size)
+
     return cleaned_img
