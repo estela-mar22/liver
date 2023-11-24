@@ -58,3 +58,6 @@ def napari_viewer_all_in_one(img):
     #Napari is executed and the image is visualized.
     viewer = napari.Viewer()
     viewer.add_image(img)
+    
+    
+#D:/estela/data/microscopy/leica_stellaris/S
